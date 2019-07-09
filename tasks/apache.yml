@@ -1,0 +1,6 @@
+---
+
+- name: Create apache zone
+  template: src=apache_zone.conf.j2 dest="/etc/apache2/sites.d/phpmyadmin.conf"
+  notify:
+   - restart apache2

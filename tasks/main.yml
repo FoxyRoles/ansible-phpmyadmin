@@ -1,0 +1,22 @@
+---
+
+- name: Check apache installed
+  shell: dpkg -l | grep '^ii  apache2'
+  failed_when: False
+  changed_when: False
+  register: apache_installed
+
+- name: Check nginx installed
+  shell: dpkg -l | grep '^ii  nginx-common'
+  failed_when: False
+  changed_when: False
+  register: nginx_installed
+
+- include_tasks: install.yml
+  when: phpmyadmin_destination is defined and phpmyadmin_folder is defined
+- include_tasks: config.yml
+  when: phpmyadmin_destination is defined and phpmyadmin_folder is defined
+- include_tasks: apache.yml
+  when: apache_installed.stdout != "" and phpmyadmin_domain is defined
+- include_tasks: nginx.yml
+  when: nginx_installed.stdout != "" and phpmyadmin_domain is defined

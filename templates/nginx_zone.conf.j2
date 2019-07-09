@@ -1,0 +1,17 @@
+server {
+    listen       80;
+    listen       [::]:80;
+    server_name  {{ phpmyadmin_domain }};
+
+    root         {{ phpmyadmin_folder }};
+    index        index.html index.php;
+
+    access_log   off;
+    error_log    /dev/null crit;
+
+    location ~ \.php$ {
+        include       fastcgi_params;
+        include       fastcgi_limits;
+        fastcgi_pass  php;
+    }
+}

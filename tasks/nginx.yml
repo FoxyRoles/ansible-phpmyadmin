@@ -1,0 +1,6 @@
+---
+
+- name: Create nginx zone
+  template: src=nginx_zone.conf.j2 dest="/etc/nginx/sites.d/phpmyadmin"
+  notify:
+   - restart nginx

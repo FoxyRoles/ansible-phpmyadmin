@@ -1,0 +1,29 @@
+---
+
+- name: phpMyAdmin config exists
+  stat: path="{{ phpmyadmin_folder }}/config.inc.php"
+  register: pma_config
+
+- name: Generate blowfish_secret for phpMyAdmin config
+  command: openssl rand -base64 48
+  register: blowfish_secret
+  when: not pma_config.stat.exists
+
+- name: Ensure phpMyAdmin control user present
+  mysql_user:
+    name: phpmyadmin
+    password: "{{ controluser_password }}"
+    priv: "phpmyadmin.*:ALL"
+    state: present
+  when: not pma_config.stat.exists
+
+- name: Ensure phpMyAdmin database present
+  mysql_db: name="{{ pmadb }}" state=import target="{{ phpmyadmin_folder }}/sql/create_tables.sql"
+  when: not pma_config.stat.exists
+
+- name: Ensure phpMyAdmin config present
+  template: src=config.inc.php.j2 dest="{{ phpmyadmin_folder }}/config.inc.php"
+  when: not pma_config.stat.exists
+
+- name: Ensure owner of phpMyAdmin directory
+  file: dest="{{ phpmyadmin_folder }}" owner="{{ web_user }}" group="{{ web_user }}" recurse=True

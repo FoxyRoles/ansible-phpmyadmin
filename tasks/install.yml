@@ -1,0 +1,21 @@
+---
+
+- name: phpMyAdmin directory exists
+  stat: path="{{ phpmyadmin_folder }}"
+  register: pma_folder
+
+- name: Download phpMyAdmin
+  get_url: url=https://files.phpmyadmin.net/phpMyAdmin/4.7.2/phpMyAdmin-4.7.2-all-languages.zip dest="{{ phpmyadmin_destination }}" validate_certs=False
+  when: not pma_folder.stat.exists
+
+- name: Unpack phpMyAdmin
+  unarchive: src="{{ phpmyadmin_destination }}/phpMyAdmin-4.7.2-all-languages.zip" dest="{{ phpmyadmin_destination }}" copy=no
+  when: not pma_folder.stat.exists
+
+- name: Rename to proper name
+  command: mv "{{ phpmyadmin_destination }}/phpMyAdmin-4.7.2-all-languages" "{{ phpmyadmin_folder }}"
+  when: not pma_folder.stat.exists
+
+- name: Delete downloaded archive
+  file: dest="{{ phpmyadmin_destination }}/phpMyAdmin-4.7.2-all-languages.zip" state=absent
+  when: not pma_folder.stat.exists
