@@ -1,4 +1,4 @@
-# ansible-composer
+# ansible-phpmyadmin
 
 Setups phpMyAdmin.
 
