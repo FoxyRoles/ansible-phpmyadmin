@@ -1,22 +1,24 @@
 ---
 
-- name: Check apache installed
-  shell: dpkg -l | grep '^ii  apache2'
-  failed_when: False
-  changed_when: False
-  register: apache_installed
-
-- name: Check nginx installed
-  shell: dpkg -l | grep '^ii  nginx-common'
-  failed_when: False
-  changed_when: False
-  register: nginx_installed
+- name: Check whether Apache and Nginx are installed
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - --show
+      - '--showformat=${Package} ${db:Status-Status}\n'
+      - apache2
+      - nginx-common
+    expand_argument_vars: false
+  register: phpmyadmin_web_packages
+  failed_when: phpmyadmin_web_packages.rc not in [0, 1]
+  changed_when: false
+  check_mode: false
 
 - include_tasks: install.yml
   when: phpmyadmin_destination is defined and phpmyadmin_folder is defined
 - include_tasks: config.yml
   when: phpmyadmin_destination is defined and phpmyadmin_folder is defined
 - include_tasks: apache.yml
-  when: apache_installed.stdout != "" and phpmyadmin_domain is defined
+  when: phpmyadmin_domain is defined and 'apache2 installed' in phpmyadmin_web_packages.stdout_lines
 - include_tasks: nginx.yml
-  when: nginx_installed.stdout != "" and phpmyadmin_domain is defined
+  when: phpmyadmin_domain is defined and 'nginx-common installed' in phpmyadmin_web_packages.stdout_lines
